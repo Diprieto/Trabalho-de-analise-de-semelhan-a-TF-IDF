@@ -1,0 +1,1 @@
+# Trabalho-de-analise-de-semelhan-a-TF-IDF
