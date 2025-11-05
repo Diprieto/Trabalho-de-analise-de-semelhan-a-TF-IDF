@@ -1,0 +1,223 @@
+\documentclass[
+    12pt,                   % Tamanho da fonte
+    a4paper,                % Tipo de papel
+    brazil,                 % Idioma
+    openany,                % Capítulos e seções podem começar em qualquer página
+    sumario=tradicional      % Sumário formatado como tradicional
+]{abntex2}
+
+% --- PACOTES BÁSICOS ---
+\usepackage[T1]{fontenc}        % Codificação de fonte
+\usepackage[utf8]{inputenc}     % Codificação de entrada
+\usepackage{lmodern}            % Fonte (alternativa ao Times New Roman)
+\usepackage{indentfirst}        % Indenta o primeiro parágrafo de cada seção
+\usepackage{hyperref}           % Para referências e links (opcional, mas bom)
+\usepackage{graphicx}
+% --- PACOTES MATEMÁTICOS ---
+\usepackage{amsmath,amsthm,amsfonts,amssymb,dsfont,mathtools} 
+
+% --- PACOTES PARA TABELAS ---
+\usepackage{booktabs} % Melhora a qualidade das linhas horizontais em tabelas
+\usepackage{longtable} % Para tabelas que ocupam mais de uma página
+
+% --- PACOTE blindtext (mantido, mas pode ser removido no documento final) ---
+\usepackage{blindtext}
+\graphicspath{{C:/Users/diego/OneDrive/Imagens/Latex/}}
+
+% --- INFORMAÇÕES DO DOCUMENTO ---
+\title{Pesquisa de Similaridade de Jogos por Gênero - IGDB Games Dataset}
+\author{Diego de Farias Carazo Prieto}
+\date{3 de Novembro de 2025}
+
+% --- INÍCIO DO DOCUMENTO ---
+\begin{document}
+
+% --- ESTRUTURA PRÉ-TEXTUAL BÁSICA ---
+\maketitle  % Cria a folha de rosto/capa simples
+\tableofcontents % Gera o Sumário
+
+% --- SEÇÃO 1: INTRODUÇÃO E OBJETIVO ---
+\chapter{Introdução e Objetivo}
+
+A análise de grandes volumes de dados textuais para identificar relevância temática é um desafio central no Processamento de Linguagem Natural (PLN). Este projeto se insere nesse contexto, buscando explorar as similaridades conceituais em um vasto repositório de metadados de jogos.
+
+\section{Descrição do Dataset}
+O \textbf{IGDB Games Dataset} é um banco de dados sobre videogames, tendo uma extensa biblioteca de informações detalhadas sobre títulos, gêneros, plataformas e data de lançamento dos jogos. O arquivo original, disponibilizado em CSV, contém 380179 linhas e 60 colunas.
+
+Esta pesquisa utiliza primariamente as seguintes colunas para ranqueamento e análise:
+\begin{itemize}
+\item \textbf{Name (Título):} O título do jogo.
+\item \textbf{Summary (Sinopse):} O resumo/sinopse do jogo, utilizado como \textit{corpus} textual.
+\end{itemize}
+
+\section{Objetivo Central da Pesquisa}
+
+O objetivo primordial desta pesquisa é demonstrar a eficácia do modelo \textbf{TF-IDF} na recuperação de informações temáticas específicas, aplicando-o contra a \textit{query} semântica: \textbf{"dark gothic vampire world"}.
+
+Ao vetorizar a sinopse de cada jogo e a \textit{query}, é calculada a \textbf{Similaridade do Cosseno} para ranquear os jogos que apresentam maior afinidade temática com os conceitos de escuridão, estética gótica e a presença de vampirismo.
+
+\chapter{Metodologia de Similaridade}
+
+\section{Metodologia: TF-IDF e Similaridade do Cosseno}
+
+Para mensurar a relevância temática, o projeto emprega a técnica estatística \textbf{TF-IDF} (do inglês, \textit{Term Frequency–Inverse Document Frequency}), combinada com a Similaridade do Cosseno.
+
+\begin{quote}
+O \textbf{TF-IDF} é uma métrica que visa quantificar a importância de um termo para um documento específico dentro de uma coleção (o \textit{corpus}). Ele faz isso ponderando a frequência de uma palavra no documento (\textit{Term Frequency}) pela raridade dessa palavra em toda a coleção de documentos (\textit{Inverse Document Frequency}). Palavras-chave raras e específicas (como \textit{vampire} ou \textit{gothic}) recebem um peso maior do que palavras comuns, permitindo que o modelo identifique o conteúdo único de cada sinopse.
+\end{quote}
+
+\section{Metodologia de Implementação}
+O processo de similaridade textual foi dividido em quatro etapas principais, conforme detalhado nas subseções a seguir.
+\section{Visualização do Código Implementado}
+
+O processo de similaridade foi dividido logicamente em cinco blocos principais no código Python, garantindo a rastreabilidade das etapas de pré-processamento, vetorização e ranqueamento.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Sem título.png}
+    \caption{Função Python para limpeza de texto (\texttt{clean\_text}), incluindo remoção de stopwords.}
+    \label{fig:clean_text}
+\end{figure}
+\subsection{Pré-Processamento dos Dados}
+Esta etapa é crucial para garantir que apenas os termos mais relevantes contribuam para o cálculo de similaridade e evitar ruído textual.
+
+
+\begin{enumerate}
+    \item \textbf{Carregamento e Seleção:} O \textit{dataset} foi carregado através da biblioteca \texttt{pandas}. O projeto focou em três colunas principais: \texttt{name} (Nome do Jogo), \texttt{summary} (Sinopse) e \texttt{tags} (Tags).
+
+    
+    \item \textbf{Limpeza de Texto:} Uma função de limpeza (\texttt{clean\_text}) foi aplicada à coluna de sinopses (\texttt{summary}), realizando as seguintes transformações:
+    \begin{itemize}
+        \item Conversão para minúsculas.
+        \item Remoção de pontuações e caracteres especiais (\textit{regex} \texttt{[a-z\textbackslash s]}).
+        \item Tokenização das sentenças (\texttt{nltk.word\_tokenize}).
+        \item Remoção de \textit{stopwords} (palavras irrelevantes comuns, como 'a', 'o', 'de', 'e') definidas para o idioma Inglês.
+        \item Filtro final para remover palavras com apenas uma letra.
+    \end{itemize}
+
+    
+    \item \textbf{Preparo da \textit{Query}:} O termo de busca (\texttt{"dark gothic vampire world"}) foi submetido ao mesmo processo de pré-processamento para que estivesse no mesmo formato dos dados do \textit{dataset}.
+\end{enumerate}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.85\textwidth]{ArquivoLatex2.png}
+    \caption{Carregamento do dataset, validação das colunas e aplicação inicial da função de limpeza.}
+    \label{fig:carregamento}
+\end{figure}
+\subsection{Geração da Matriz TF-IDF}
+O \textbf{TfidfVectorizer} da biblioteca \texttt{sklearn} foi configurado e aplicado aos dados limpos.
+
+\begin{itemize}
+    \item \textbf{Inicialização do Vetorizador:} O vetorizador foi configurado para gerar \textit{unigrams} e \textit{bigrams} (\texttt{ngram\_range=(1, 2)}).
+    
+    \item \textbf{Filtros Estatísticos:} Foram aplicados filtros para otimizar o vocabulário, ignorando termos que aparecem em mais de $85\%$ dos documentos (\texttt{max\_df=0.85}) e termos que aparecem em menos de $5$ documentos (\texttt{min\_df=5}).
+    
+    \item \textbf{Ajuste e Transformação:} O vetorizador foi treinado nos dados limpos (\texttt{df['cleaned\_tags']}) para gerar a matriz esparsa TF-IDF.
+\end{itemize}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.85\textwidth]{ArquivoLatex3.png}
+    \caption{Inicialização e treinamento do \texttt{TfidfVectorizer} (\texttt{sklearn}) e criação da matriz TF-IDF.}
+    \label{fig:tfidf_matrix}
+\end{figure}
+\subsection{Cálculo da Similaridade de Cosseno}
+Para ranquear os jogos, foi utilizada a Similaridade do Cosseno.
+
+\begin{itemize}
+    \item \textbf{Vetorização da \textit{Query}:} O vetorizador treinado foi usado para transformar a \textit{query} limpa (\texttt{query\_vector}) no espaço vetorial dos documentos.
+    
+    \item \textbf{Cálculo da Similaridade:} A similaridade foi calculada por meio do \textbf{produto escalar} da matriz TF-IDF pelo vetor da \textit{query}.
+    
+    \item \textbf{Pontuação (SCORE):} O resultado desse cálculo gerou um \textit{score} de similaridade (\texttt{goth\_vampire\_score}) para cada jogo.
+\end{itemize}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.85\textwidth]{ArquivoLatex4.png}
+    \caption{Cálculo da Similaridade do Cosseno via produto escalar entre a matriz TF-IDF e o vetor da query.}
+    \label{fig:sim_cosseno}
+\end{figure}
+\subsection{Ranqueamento e Exibição dos Resultados}
+Na etapa final, o \textit{score} de similaridade foi adicionado ao \textit{DataFrame} original e classificado em ordem decrescente.
+
+\begin{itemize}
+    \item O \textit{DataFrame} foi classificado em ordem decrescente de \textit{score} (\texttt{df\_sorted = df.sort\_values(by='goth\_vampire\_score', ascending=False)}).
+    
+    \item Os \textbf{10 jogos mais relevantes} foram selecionados e formatados para exibição.
+\end{itemize}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.85\textwidth]{ArquivoLatex5.png}
+    \caption{Loop final de ranqueamento, extração dos dados e formatação de saída dos 10 jogos mais relevantes.}
+    \label{fig:ranqueamento}
+\end{figure}
+\chapter{Resultados e Análise}
+
+A Tabela \ref{tab:jogos_similares} apresenta os 10 jogos com maior similaridade temática em relação à \textit{query} "dark gothic vampire world", juntamente com suas pontuações.
+
+\begin{table}[!htb] % Ajusta a posição da tabela
+    \centering
+    \caption{Top 10 Jogos Mais Relevantes para o Tema}
+    \label{tab:jogos_similares}
+    \begin{tabular}{llc}
+        \toprule
+        \textbf{RANK} & \textbf{NOME DO JOGO} & \textbf{SIMILARIDADE} \\
+        \midrule
+        1 & Dark Legends & 0.4277 \\
+        2 & Warhammer 40,000: Storm Of Vengeance & 0.3920 \\
+        3 & Lady Hunt & 0.3325 \\
+        4 & Tales From The Under-Realm: After Midnight & 0.3311 \\
+        5 & Demoniaca: Everlasting Night & 0.3173 \\
+        6 & Elminage Gothic & 0.3118 \\
+        7 & Vampire Ventures & 0.2983 \\
+        8 & Blade & 0.2889 \\
+        9 & Hell Of A Marriage & 0.2834 \\
+        10 & Immortal Realms: Vampire Wars & 0.2826 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+\begin{enumerate}
+    \item \textbf{Dark Legends} (Similaridade: 0.4277)
+    \newline \textit{Resumo:} Vampire game.
+
+    \item \textbf{Warhammer 40,000: Storm Of Vengeance} (Similaridade: 0.3920)
+    \newline \textit{Resumo:} Warhammer 40,000: Storm Of Vengeance is a lane strategy game set in the dark, gothic universe of Warhammer 40,000.
+
+    \item \textbf{Lady Hunt} (Similaridade: 0.3325)
+    \newline \textit{Resumo:} Lady Hunt is a pixel art action platformer, set in a dark gothic world, where blood has been infected. You play as a huntress, who must find a way to purify this world, inhabited by monsters and beasts.
+
+    \item \textbf{Tales From The Under-Realm: After Midnight} (Similaridade: 0.3311)
+    \newline \textit{Resumo:} TFTU: After Midnight is a dark / gothic visual novel with multiple endings. Your choices matter and will determine who stays alive and who dies. Discovering the whole truth about the murders will require more than one playthrough.
+
+    \item \textbf{Demoniaca: Everlasting Night} (Similaridade: 0.3173)
+    \newline \textit{Resumo:} Demoniaca - is a dark, gothic, mature and sexy action rpg inspired by the Castlevania series. Explore, fight, meet new friends and avenge those who brought you unbearable pain and loss.
+
+    \item \textbf{Elminage Gothic} (Similaridade: 0.3118)
+    \newline \textit{Resumo:} From the makers of the world renowned “Wizardry Empire” titles, Starfish SD brings you the latest entry in their popular series of dungeon crawlers. Elminage Gothic, previously only available in Japanese on PlayStation Portable, now comes to PC offering a classic old school dungeon crawling experience with a dark, gothic twist!
+
+    \item \textbf{Vampire Ventures} (Similaridade: 0.2983)
+    \newline \textit{Resumo:} A match-3 quest in which Vampire Valory has to find her father who was kidnapped by Vladoric the Vampire.
+
+    \item \textbf{Blade} (Similaridade: 0.2889)
+    \newline \textit{Resumo:} You're blade, Gothic City's baddest vampire hunter. When rival vampire clams ignite a deadly feud, you go deep to do some serous demon killing. Stalk the undead through 24 gothic locations, then waste an arsenal of intense weapons. Plan on staying up late tonight 'cause and even greater evil awaits.
+
+    \item \textbf{Hell Of A Marriage} (Similaridade: 0.2834)
+    \newline \textit{Resumo:} Faustian Gothic Gay Romance
+
+    \item \textbf{Immortal Realms: Vampire Wars} (Similaridade: 0.2826)
+    \newline \textit{Resumo:} Immortal Realms: Vampire Wars is an engaging strategy game set in a dark vampire world in turmoil, that combines empire management and turn-based combat with unique card-game elements. Descend into a mythical world filled with horrors and legends – and hurl yourself into a compelling gothic adventure paired with a challenging game experience. Discover the secrets of Nemire and experience an enthralling story from the perspective of four mighty vampire lords, each with their own goals and agendas.
+\end{enumerate}
+\section{Análise dos Ângulos Comuns}
+Para realizar a Análise de Ângulos Comuns, foram identificados os termos temáticos da \textit{query} — \textbf{Vampiro}, \textbf{Gótico/Dark} e \textbf{Mundo/Cenário} — nos resumos dos 10 jogos listados.
+
+\begin{enumerate}
+    \item \textbf{Prevalência do Ângulo Gótico/Dark:} Este é o ângulo mais presente, aparecendo explicitamente em \textbf{9 dos 10} resumos, destacando a forte correlação entre os adjetivos e o ranqueamento. O caso de \textit{Warhammer 40,000: Storm Of Vengeance} (Rank 2) é notável, pois sua alta pontuação é devida quase integralmente à presença de "dark, gothic universe" na sinopse, mesmo sem tags listadas, indicando o peso do texto para o modelo.
+
+    \item \textbf{O Ângulo Vampiro:} O tema \textbf{Vampiro} ou caçador de vampiros aparece em \textbf{5 dos 10} jogos. A alta pontuação de \textit{Dark Legends} (Rank 1) sugere que a palavra "Vampire" possui um peso semântico altíssimo na função de similaridade. Os jogos que combinam Vampiro e Gótico (ex: \textit{Immortal Realms}, \textit{Blade}) tendem a estar na faixa de similaridade média-baixa (0.28-0.29).
+
+    \item \textbf{O Ângulo Mundo/Cenário:} Este ângulo, expresso por termos como "world" ou "universe", é o menos comum, aparecendo explicitamente em apenas \textbf{4 dos 10} jogos. Isso indica que, embora seja um termo da \textit{query}, ele foi o menos determinante para a pontuação final de similaridade.
+\end{enumerate}
+
+\chapter{Conclusão}
+A pesquisa demonstra que os jogos mais semelhantes à \textit{query} possuem uma forte e direta correspondência com os termos centrais da busca, validando a eficácia do método TF-IDF na mineração de texto para identificação de similaridade temática em grandes \textit{datasets}. Embora todos os termos não tenham sido encontrados em conjunto, mesmo com as temáticas tendo uma relação, demonstra que estes jogos correspondem à pesquisa, e estão relacionados, mesmo sem menção.
+
+\end{document}
